@@ -1,3 +1,4 @@
+import Veiculo from '#models/veiculo'
 import type { HttpContext } from '@adonisjs/core/http'
 
 export default class VeiculosController {
@@ -5,7 +6,10 @@ export default class VeiculosController {
    * Display a list of resource
    */
   async index({view}: HttpContext) {
-    return view.render('pages/veiculos/index')
+    const veiculos = await Veiculo.all()
+
+    
+    return view.render('pages/veiculos/index', {veiculos})
   }
 
   /**
@@ -18,25 +22,47 @@ export default class VeiculosController {
   /**
    * Handle form submission for the create action
    */
-  async store({ request }: HttpContext) {}
+  async store({ request, response, session}: HttpContext) {
+    console.log('formulario submited')
+    console.log(request.body())
 
-  /**
-   * Show individual record
-   */
-  async show({ params }: HttpContext) {}
+    const veiculo = await Veiculo.create({
+      marca: request.input('marca'), 
+      modelo: request.input('modelo'), 
+      anoFabricacao: request.input('anoFabricacao'), 
+      anoModelo: 2000, 
+      renavam: 1234567, 
+      cor: 'cinza',
+      placa: 'OHP-7F44',
+      situacao:request.input('situacao'),
+    })
+      if(veiculo.$isPersisted){
+        session.flash('notificacao',{
+          type: 'success',
+          message: `Veículo ${veiculo.modelo} cadastrado com sucesso`
+        })
+      }
+      return response.redirect().toRoute('veiculos.index')
+  }
 
-  /**
-   * Edit individual record
-   */
-  async edit({ params }: HttpContext) {}
-
-  /**
-   * Handle form submission for the edit action
-   */
-  async update({ params, request }: HttpContext) {}
-
-  /**
-   * Delete record
-   */
-  async destroy({ params }: HttpContext) {}
 }
+  // /**
+  //  * Show individual record
+  //  */
+  // async show({ params }: HttpContext) {}
+
+  // /**
+  //  * Edit individual record
+  //  */
+  // async edit({ params }: HttpContext) {}
+
+  // /**
+  //  * Handle form submission for the edit action
+  //  */
+  // async update({ params, request }: HttpContext) {}
+
+  // /**
+  //  * Delete record
+  //  */
+  // async destroy({ params }: HttpContext) {}
+  
