@@ -1,4 +1,5 @@
 import Veiculo from '#models/veiculo'
+import { createVeiculoValidator, messagesVeiculoProvider } from '#validators/veiculo'
 import type { HttpContext } from '@adonisjs/core/http'
 
 export default class VeiculosController {
@@ -23,18 +24,22 @@ export default class VeiculosController {
    * Handle form submission for the create action
    */
   async store({ request, response, session}: HttpContext) {
-    console.log('formulario submited')
-    console.log(request.body())
+    
+    const dados = request.all()
+
+    console.log('antes',dados)
+    const dadosValidos = await createVeiculoValidator.validate(dados, {messagesProvider:messagesVeiculoProvider})
+    console.log('depois',dadosValidos)
 
     const veiculo = await Veiculo.create({
-      marca: request.input('marca'), 
-      modelo: request.input('modelo'), 
-      anoFabricacao: request.input('anoFabricacao'), 
-      anoModelo: 2000, 
-      renavam: 1234567, 
-      cor: 'cinza',
-      placa: 'OHP-7F44',
-      situacao:request.input('situacao'),
+      marca: dadosValidos.marca,
+      modelo: dadosValidos.modelo, 
+      anoFabricacao: dadosValidos.anoFabricacao, 
+      anoModelo: dadosValidos.anoModelo,
+      renavam: dadosValidos.renavam, 
+      cor: dadosValidos.cor,
+      placa: dadosValidos.placa,
+      situacao: dadosValidos.situacao,
     })
       if(veiculo.$isPersisted){
         session.flash('notificacao',{
